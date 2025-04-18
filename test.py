@@ -30,14 +30,14 @@ class RaindropDustAutomaticTest(unittest.TestCase):
         self.driver.implicitly_wait(0.5)
         self.wait = WebDriverWait(self.driver, 30)
 
-    def table_template(self, x_path, http):
+    def table_template(self, api_endpoint, http):
         self.driver.get("http://localhost:8501/dataset")
         time.sleep(2)
 
         self.wait.until(
-            EC.presence_of_element_located((By.XPATH, x_path))
+            EC.presence_of_element_located((By.XPATH, api_endpoint))
         )
-        summary = self.driver.find_element(By.XPATH, x_path)
+        summary = self.driver.find_element(By.XPATH, api_endpoint)
         summary.click()
         time.sleep(2)
 
@@ -67,7 +67,7 @@ class RaindropDustAutomaticTest(unittest.TestCase):
 
         self.assertTrue(values == table_values, msg="The table values don't match the expected values.")
 
-    def api_endpoint_template(self, api_endpoint, http, valid):
+    def api_endpoint_template(self, api_endpoint, valid):
         self.driver.get("http://localhost:8501/api")
         time.sleep(2)
 
@@ -115,7 +115,7 @@ class RaindropDustAutomaticTest(unittest.TestCase):
             copied_data = pyperclip.paste()
             time.sleep(2)
 
-            self.driver.get(http)
+            self.driver.get(f"http://localhost:8000{api_endpoint}")
             time.sleep(2)
 
             pre_element = self.wait.until(
@@ -218,37 +218,30 @@ class RaindropDustAutomaticTest(unittest.TestCase):
 
     def test_valid_api(self):
         self.api_endpoint_template("/data/latest?limit=2",
-                                   "http://localhost:8000/data/latest?limit=2",
                                    1)
 
     def test_invalid_api(self):
         self.api_endpoint_template("/data/late?",
-                                   "http://localhost:8000/data/late?",
                                    0)
 
     def test_data_latest(self):
         self.api_endpoint_template("/data/latest?limit=5",
-                                   "http://localhost:8000/data/latest?limit=5",
                                    1)
 
     def test_data(self):
         self.api_endpoint_template("/data?start_date=2025-04-01&end_date=2025-04-03&skip=0&limit=2",
-                                   "http://localhost:8000/data?start_date=2025-04-01&end_date=2025-04-03&skip=0&limit=2",
                                    1)
 
     def test_forecast_1day(self):
         self.api_endpoint_template("/forecast/1day?limit=5",
-                                   "http://localhost:8000/forecast/1day?limit=5",
                                    1)
 
     def test_raw_secondary(self):
         self.api_endpoint_template("/raw/secondary?limit=3&sort=1",
-                                   "http://localhost:8000/raw/secondary?limit=3&sort=1",
                                    1)
 
     def test_boundary_api(self):
-        self.api_endpoint_template("/data/aqi?start_date=2025-04-11&end_date=2025-04-11",
-                                   "http://localhost:8000/data/aqi?start_date=2025-04-11&end_date=2025-04-11",
+        self.api_endpoint_template("/data/summary/custom?start_date=2025-03-25&end_date=2025-03-25",
                                    1)
 
     def tearDown(self):
